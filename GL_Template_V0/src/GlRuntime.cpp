@@ -347,7 +347,11 @@ bool OpenGlRenderer::RenderWithProgram(const GpuShaderProgram& program, int widt
         return false;
     }
 
-    pixels->assign(static_cast<std::size_t>(width) * static_cast<std::size_t>(height) * 4, 0);
+    const std::size_t pixelBytes = static_cast<std::size_t>(width) * static_cast<std::size_t>(height) * 4;
+    if (pixels->size() != pixelBytes)
+    {
+        pixels->resize(pixelBytes);
+    }
     glReadBuffer(GL_COLOR_ATTACHMENT0);
     glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels->data());
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

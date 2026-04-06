@@ -17,6 +17,12 @@
 
 namespace
 {
+constexpr double kScanTickIntervalSeconds = 0.03;
+constexpr double kThumbnailTickIntervalSeconds = 0.02;
+constexpr float kGridCardWidth = 210.0f;
+constexpr float kGridThumbnailWidth = 192.0f;
+constexpr float kGridThumbnailHeight = 108.0f;
+
 std::string ReadWholeFile(const std::filesystem::path& path)
 {
     std::ifstream stream(path, std::ios::binary);
@@ -125,6 +131,10 @@ int ShaderToolApp::Run()
 
 void ShaderToolApp::Shutdown()
 {
+    batchRenderer_.Update(catalog_, logger_);
+    batchRenderer_.Shutdown();
+    batchRenderer_.Update(catalog_, logger_);
+
     previewProgram_.Reset();
     if (window_ != nullptr)
     {
@@ -189,24 +199,29 @@ void ShaderToolApp::BeginScan()
     previewCompileLog_.clear();
     previewProgram_.Reset();
     thumbnails_.Reset(renderer_);
+    nextScanTickTime_ = glfwGetTime();
+    nextThumbnailTickTime_ = glfwGetTime();
 }
 
 void ShaderToolApp::TickBackgroundWork()
 {
-    if (catalog_.TickScan(renderer_, logger_))
+    const double now = glfwGetTime();
+
+    if (!batchRenderer_.IsBusy() && catalog_.IsScanInProgress() && now >= nextScanTickTime_)
     {
-        thumbnails_.QueueMissing(catalog_.Records());
-    }
-    else if (!catalog_.IsScanInProgress())
-    {
-        thumbnails_.QueueMissing(catalog_.Records());
+        catalog_.TickScan(renderer_, logger_);
+        nextScanTickTime_ = glfwGetTime() + kScanTickIntervalSeconds;
     }
 
-    batchRenderer_.Update(renderer_, catalog_, logger_);
+    batchRenderer_.Update(catalog_, logger_);
 
-    if (!batchRenderer_.IsBusy())
+    if (!batchRenderer_.IsBusy()
+        && !catalog_.IsScanInProgress()
+        && viewMode_ == ViewMode::Grid
+        && now >= nextThumbnailTickTime_)
     {
         thumbnails_.Tick(renderer_, catalog_.Records(), logger_);
+        nextThumbnailTickTime_ = glfwGetTime() + kThumbnailTickIntervalSeconds;
     }
 }
 
@@ -269,7 +284,7 @@ void ShaderToolApp::HandleShortcuts()
     }
 
     ImGuiIO& io = ImGui::GetIO();
-    if (io.WantCaptureKeyboard)
+    if (io.WantTextInput)
     {
         return;
     }
@@ -504,79 +519,108 @@ void ShaderToolApp::DrawGrid()
             filterText_ = filterBuffer;
         }
 
-        const float cardWidth = 210.0f;
         const float availableWidth = ImGui::GetContentRegionAvail().x;
-        const int columns = std::max(1, static_cast<int>(availableWidth / cardWidth));
+        const int columns = std::max(1, static_cast<int>(availableWidth / kGridCardWidth));
+        const auto& records = catalog_.Records();
+
+        std::string needle = filterText_;
+        std::transform(needle.begin(), needle.end(), needle.begin(), [](unsigned char value) {
+            return static_cast<char>(std::tolower(value));
+        });
+
+        std::vector<std::size_t> filteredIndices;
+        filteredIndices.reserve(records.size());
+        for (std::size_t index = 0; index < records.size(); ++index)
+        {
+            const ShaderRecord& record = records[index];
+            if (!needle.empty())
+            {
+                std::string haystack = record.displayName + " " + record.sourcePath.string();
+                std::transform(haystack.begin(), haystack.end(), haystack.begin(), [](unsigned char value) {
+                    return static_cast<char>(std::tolower(value));
+                });
+
+                if (haystack.find(needle) == std::string::npos)
+                {
+                    continue;
+                }
+            }
+
+            filteredIndices.push_back(index);
+        }
 
         if (ImGui::BeginTable("grid_table", columns))
         {
-            const auto& records = catalog_.Records();
-            for (std::size_t index = 0; index < records.size(); ++index)
+            ImGuiListClipper clipper;
+            const int rowCount = static_cast<int>((filteredIndices.size() + static_cast<std::size_t>(columns) - 1) / static_cast<std::size_t>(columns));
+            clipper.Begin(rowCount);
+            while (clipper.Step())
             {
-                const ShaderRecord& record = records[index];
-                if (!filterText_.empty())
+                for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; ++row)
                 {
-                    std::string haystack = record.displayName + " " + record.sourcePath.string();
-                    std::transform(haystack.begin(), haystack.end(), haystack.begin(), [](unsigned char value) {
-                        return static_cast<char>(std::tolower(value));
-                    });
-
-                    std::string needle = filterText_;
-                    std::transform(needle.begin(), needle.end(), needle.begin(), [](unsigned char value) {
-                        return static_cast<char>(std::tolower(value));
-                    });
-
-                    if (haystack.find(needle) == std::string::npos)
+                    ImGui::TableNextRow();
+                    for (int column = 0; column < columns; ++column)
                     {
-                        continue;
+                        ImGui::TableSetColumnIndex(column);
+
+                        const std::size_t filteredOffset = static_cast<std::size_t>(row) * static_cast<std::size_t>(columns) + static_cast<std::size_t>(column);
+                        if (filteredOffset >= filteredIndices.size())
+                        {
+                            continue;
+                        }
+
+                        const std::size_t index = filteredIndices[filteredOffset];
+                        const ShaderRecord& record = records[index];
+
+                        thumbnails_.QueueIfNeeded(record);
+
+                        ImGui::BeginGroup();
+
+                        GLuint texture = thumbnails_.GetTextureFor(record, renderer_, logger_);
+                        if (texture != 0)
+                        {
+                            if (ImGui::ImageButton(record.stableId.c_str(), reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture)),
+                                ImVec2(kGridThumbnailWidth, kGridThumbnailHeight)))
+                            {
+                                activeIndex_ = static_cast<int>(index);
+                                LoadPreviewShader(index);
+                            }
+
+                            if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+                            {
+                                viewMode_ = ViewMode::Preview;
+                            }
+                        }
+                        else if (ImGui::Button(("Pending##" + record.stableId).c_str(), ImVec2(kGridThumbnailWidth, kGridThumbnailHeight)))
+                        {
+                            activeIndex_ = static_cast<int>(index);
+                            LoadPreviewShader(index);
+                        }
+
+                        ImGui::TextWrapped("%s", record.displayName.c_str());
+                        ImGui::Text("%s | %s", record.selected ? "Queued" : "Not queued", record.rendered ? "Rendered" : "Not rendered");
+
+                        const std::string queueLabel = std::string(record.selected ? "Unqueue##" : "Queue##") + record.stableId;
+                        if (ImGui::Button(queueLabel.c_str()))
+                        {
+                            activeIndex_ = static_cast<int>(index);
+                            std::string error;
+                            if (!catalog_.ToggleSelection(index, logger_, &error))
+                            {
+                                statusMessage_ = error;
+                            }
+                        }
+
+                        if (ImGui::IsItemHovered())
+                        {
+                            ImGui::BeginTooltip();
+                            ImGui::TextWrapped("%s", record.sourcePath.string().c_str());
+                            ImGui::EndTooltip();
+                        }
+
+                        ImGui::EndGroup();
                     }
                 }
-
-                ImGui::TableNextColumn();
-                ImGui::BeginGroup();
-
-                GLuint texture = thumbnails_.GetTextureFor(record, renderer_, logger_);
-                if (texture != 0)
-                {
-                    if (ImGui::ImageButton(record.stableId.c_str(), reinterpret_cast<ImTextureID>(static_cast<intptr_t>(texture)), ImVec2(192.0f, 108.0f)))
-                    {
-                        activeIndex_ = static_cast<int>(index);
-                        LoadPreviewShader(index);
-                    }
-
-                    if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-                    {
-                        viewMode_ = ViewMode::Preview;
-                    }
-                }
-                else if (ImGui::Button(("Pending##" + record.stableId).c_str(), ImVec2(192.0f, 108.0f)))
-                {
-                    activeIndex_ = static_cast<int>(index);
-                    LoadPreviewShader(index);
-                }
-
-                ImGui::TextWrapped("%s", record.displayName.c_str());
-                ImGui::Text("%s | %s", record.selected ? "Queued" : "Not queued", record.rendered ? "Rendered" : "Not rendered");
-
-                const std::string queueLabel = std::string(record.selected ? "Unqueue##" : "Queue##") + record.stableId;
-                if (ImGui::Button(queueLabel.c_str()))
-                {
-                    activeIndex_ = static_cast<int>(index);
-                    std::string error;
-                    if (!catalog_.ToggleSelection(index, logger_, &error))
-                    {
-                        statusMessage_ = error;
-                    }
-                }
-
-                if (ImGui::IsItemHovered())
-                {
-                    ImGui::BeginTooltip();
-                    ImGui::TextWrapped("%s", record.sourcePath.string().c_str());
-                    ImGui::EndTooltip();
-                }
-
-                ImGui::EndGroup();
             }
 
             ImGui::EndTable();
@@ -599,6 +643,7 @@ void ShaderToolApp::DrawScanPanel()
         ImGui::Text("Rejected: %llu", static_cast<unsigned long long>(summary.invalid));
         ImGui::Text("Ignored: %llu", static_cast<unsigned long long>(summary.ignored));
         ImGui::Text("Scanning: %s", summary.inProgress ? "yes" : "no");
+        ImGui::Text("Pending thumbnails: %llu", static_cast<unsigned long long>(thumbnails_.PendingCount()));
 
         ImGui::Separator();
         ImGui::TextUnformatted("Recent rejects:");
@@ -622,6 +667,12 @@ void ShaderToolApp::DrawRenderPanel()
 
     if (ImGui::Begin("Offline Render"))
     {
+        const auto& records = catalog_.Records();
+        const std::size_t queuedSelectionCount = static_cast<std::size_t>(std::count_if(records.begin(), records.end(),
+            [](const ShaderRecord& record) {
+                return record.selected;
+            }));
+
         ImGui::InputInt("Width", &renderSettings_.width);
         ImGui::InputInt("Height", &renderSettings_.height);
         ImGui::InputInt("FPS", &renderSettings_.fps);
@@ -648,11 +699,21 @@ void ShaderToolApp::DrawRenderPanel()
             renderSettings_.filenamePattern = pattern;
         }
 
+        ImGui::Separator();
+        ImGui::Text("Queued shaders: %llu", static_cast<unsigned long long>(queuedSelectionCount));
+        ImGui::Text("Batch jobs: %llu total | %llu done | %llu failed | %llu waiting",
+            static_cast<unsigned long long>(batchRenderer_.TotalJobCount()),
+            static_cast<unsigned long long>(batchRenderer_.CompletedJobCount()),
+            static_cast<unsigned long long>(batchRenderer_.FailedJobCount()),
+            static_cast<unsigned long long>(batchRenderer_.RemainingJobCount()));
+
         ImGui::TextWrapped("%s", batchRenderer_.FfmpegStatus().c_str());
+        ImGui::BeginDisabled(batchRenderer_.IsBusy());
         if (ImGui::Button("Start Batch Render"))
         {
             batchRenderer_.Start(renderSettings_, catalog_.Records(), logger_);
         }
+        ImGui::EndDisabled();
 
         if (batchRenderer_.IsBusy())
         {

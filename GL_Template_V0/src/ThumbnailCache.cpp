@@ -5,6 +5,9 @@
 
 namespace
 {
+constexpr int kThumbnailWidth = 192;
+constexpr int kThumbnailHeight = 108;
+
 std::string ReadWholeFile(const std::filesystem::path& path)
 {
     std::ifstream stream(path, std::ios::binary);
@@ -28,20 +31,17 @@ void ThumbnailCache::Reset(OpenGlRenderer& renderer)
     queuedIds_.clear();
 }
 
-void ThumbnailCache::QueueMissing(const std::vector<ShaderRecord>& records)
+void ThumbnailCache::QueueIfNeeded(const ShaderRecord& record)
 {
-    for (const ShaderRecord& record : records)
-    {
-        std::error_code ec;
-        const bool missing = !std::filesystem::exists(record.thumbnailPath, ec);
-        const bool stale = !missing
-            && std::filesystem::last_write_time(record.thumbnailPath, ec) < std::filesystem::last_write_time(record.validPath, ec);
+    std::error_code ec;
+    const bool missing = !std::filesystem::exists(record.thumbnailPath, ec);
+    const bool stale = !missing
+        && std::filesystem::last_write_time(record.thumbnailPath, ec) < std::filesystem::last_write_time(record.validPath, ec);
 
-        if ((missing || stale) && !queuedIds_.contains(record.stableId))
-        {
-            generationQueue_.push_back(record.stableId);
-            queuedIds_.insert(record.stableId);
-        }
+    if ((missing || stale) && !queuedIds_.contains(record.stableId))
+    {
+        generationQueue_.push_back(record.stableId);
+        queuedIds_.insert(record.stableId);
     }
 }
 
@@ -65,21 +65,21 @@ bool ThumbnailCache::Tick(OpenGlRenderer& renderer, const std::vector<ShaderReco
     const std::string shaderSource = ReadWholeFile(record->validPath);
 
     RuntimeUniforms uniforms;
-    uniforms.width = 320;
-    uniforms.height = 180;
+    uniforms.width = kThumbnailWidth;
+    uniforms.height = kThumbnailHeight;
     uniforms.time = 1.5f;
     uniforms.timeDelta = 1.0f / 60.0f;
     uniforms.frame = 90;
 
     std::vector<unsigned char> pixels;
     std::string error;
-    if (!renderer.RenderToImage(shaderSource, 320, 180, uniforms, &pixels, &error))
+    if (!renderer.RenderToImage(shaderSource, kThumbnailWidth, kThumbnailHeight, uniforms, &pixels, &error))
     {
         logger.Write("thumbnail", "failed to render thumbnail for " + record->displayName + ": " + error);
         return true;
     }
 
-    if (!renderer.SavePng(record->thumbnailPath, 320, 180, pixels, &error))
+    if (!renderer.SavePng(record->thumbnailPath, kThumbnailWidth, kThumbnailHeight, pixels, &error))
     {
         logger.Write("thumbnail", "failed to save thumbnail for " + record->displayName + ": " + error);
         return true;
@@ -94,6 +94,11 @@ bool ThumbnailCache::Tick(OpenGlRenderer& renderer, const std::vector<ShaderReco
 
     logger.Write("thumbnail", "generated thumbnail for " + record->displayName);
     return true;
+}
+
+std::size_t ThumbnailCache::PendingCount() const
+{
+    return generationQueue_.size();
 }
 
 GLuint ThumbnailCache::GetTextureFor(const ShaderRecord& record, OpenGlRenderer& renderer, Logger& logger)

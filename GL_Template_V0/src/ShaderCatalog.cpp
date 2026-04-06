@@ -104,15 +104,15 @@ bool ShaderCatalog::TickScan(OpenGlRenderer& renderer, Logger& logger)
     }
 
     RuntimeUniforms uniforms;
-    uniforms.width = 64;
-    uniforms.height = 64;
+    uniforms.width = 16;
+    uniforms.height = 16;
     uniforms.time = 1.0f;
     uniforms.timeDelta = 1.0f / 60.0f;
     uniforms.frame = 60;
 
     std::vector<unsigned char> pixels;
     std::string compileError;
-    if (!renderer.RenderToImage(sanitized.source, 64, 64, uniforms, &pixels, &compileError))
+    if (!renderer.RenderToImage(sanitized.source, 16, 16, uniforms, &pixels, &compileError))
     {
         ++summary_.invalid;
         ++summary_.processed;

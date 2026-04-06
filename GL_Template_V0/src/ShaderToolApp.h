@@ -83,6 +83,8 @@ private:
     WindowedPlacement windowedPlacement_;
     double previewStartTime_ = 0.0;
     double lastFrameTime_ = 0.0;
+    double nextScanTickTime_ = 0.0;
+    double nextThumbnailTickTime_ = 0.0;
     bool mouseDown_ = false;
     std::array<float, 2> clickOrigin_{ 0.0f, 0.0f };
 

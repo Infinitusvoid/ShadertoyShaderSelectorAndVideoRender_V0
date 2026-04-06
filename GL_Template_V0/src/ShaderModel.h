@@ -70,6 +70,6 @@ struct RenderSettings
     int fps = 60;
     int durationSeconds = 5;
     std::string codec = "libx264";
-    std::string preset = "medium";
+    std::string preset = "veryfast";
     std::string filenamePattern = "{shader}_{width}x{height}_{fps}fps.mp4";
 };

@@ -15,9 +15,10 @@ public:
     ~ThumbnailCache();
 
     void Reset(OpenGlRenderer& renderer);
-    void QueueMissing(const std::vector<ShaderRecord>& records);
+    void QueueIfNeeded(const ShaderRecord& record);
     bool Tick(OpenGlRenderer& renderer, const std::vector<ShaderRecord>& records, Logger& logger);
     GLuint GetTextureFor(const ShaderRecord& record, OpenGlRenderer& renderer, Logger& logger);
+    std::size_t PendingCount() const;
 
 private:
     struct LoadedTexture
