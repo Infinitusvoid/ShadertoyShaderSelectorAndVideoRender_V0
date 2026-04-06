@@ -43,20 +43,24 @@ bool Pressed(GLFWwindow* window, int key, bool& latch)
 bool ShaderToolApp::Initialize(const Options& options)
 {
     options_ = options;
+    lastError_.clear();
     folders_ = AppFolders::Resolve(options_.rootOverride);
     if (!folders_.Ensure())
     {
+        lastError_ = "Failed to create the application folders under:\n" + folders_.root.string();
         return false;
     }
 
     if (!logger_.Initialize(folders_.logs))
     {
+        lastError_ = "Failed to initialize logging under:\n" + folders_.logs.string();
         return false;
     }
 
     std::string error;
     if (!InitializeWindow(&error))
     {
+        lastError_ = error;
         logger_.Write("app", error);
         Shutdown();
         return false;
@@ -64,6 +68,7 @@ bool ShaderToolApp::Initialize(const Options& options)
 
     if (!renderer_.Initialize(&error))
     {
+        lastError_ = error;
         logger_.Write("app", error);
         Shutdown();
         return false;
@@ -84,6 +89,11 @@ bool ShaderToolApp::Initialize(const Options& options)
     statusMessage_ = "Root folder: " + folders_.root.string();
     logger_.Write("app", "application initialized with root " + folders_.root.string());
     return true;
+}
+
+const std::string& ShaderToolApp::LastError() const
+{
+    return lastError_;
 }
 
 int ShaderToolApp::Run()

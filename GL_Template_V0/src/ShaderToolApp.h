@@ -24,6 +24,7 @@ public:
 
     bool Initialize(const Options& options);
     int Run();
+    const std::string& LastError() const;
 
 private:
     enum class ViewMode
@@ -72,6 +73,7 @@ private:
     GpuShaderProgram previewProgram_;
 
     std::string loadedPreviewStableId_;
+    std::string lastError_;
     std::string previewCompileLog_;
     std::string statusMessage_;
     std::string filterText_;

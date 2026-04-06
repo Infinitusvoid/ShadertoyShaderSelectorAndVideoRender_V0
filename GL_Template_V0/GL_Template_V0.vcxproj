@@ -83,19 +83,20 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;IMGUI_IMPL_OPENGL_LOADER_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;GLEW_STATIC;IMGUI_IMPL_OPENGL_LOADER_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(ProjectDir)..\External_libs\GLEW\glew-2.1.0\include;$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\include;$(ProjectDir)..\External_libs\glm_0_9_9_7\glm\;$(ProjectDir)..\External_libs\glad\include;$(ProjectDir)..\External_libs\stb;$(ProjectDir)..\External_libs\miniaudio;$(ProjectDir)..\External_libs\tinyply-master\tinyply-master\source;$(ProjectDir)..\External_libs\plog\include;$(ProjectDir)..\External_libs\imgui-docking\imgui-docking;$(ProjectDir)..\External_libs\imgui-docking\imgui-docking\backends;$(ProjectDir)..\External_libs\FastNoiseLite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)..\External_libs\GLEW\glew-2.1.0\lib\Release\x64;$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3_mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(ProjectDir)glew32.dll" "$(OutDir)"&#x0D;&#x0A;copy /Y "$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022\glfw3.dll" "$(OutDir)"</Command>
+      <Command>if exist "$(OutDir)glew32.dll" del /Q "$(OutDir)glew32.dll"&#x0D;&#x0A;if exist "$(OutDir)glfw3.dll" del /Q "$(OutDir)glfw3.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -104,38 +105,40 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;IMGUI_IMPL_OPENGL_LOADER_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;GLEW_STATIC;IMGUI_IMPL_OPENGL_LOADER_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(ProjectDir)..\External_libs\GLEW\glew-2.1.0\include;$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\include;$(ProjectDir)..\External_libs\glm_0_9_9_7\glm\;$(ProjectDir)..\External_libs\glad\include;$(ProjectDir)..\External_libs\stb;$(ProjectDir)..\External_libs\miniaudio;$(ProjectDir)..\External_libs\tinyply-master\tinyply-master\source;$(ProjectDir)..\External_libs\plog\include;$(ProjectDir)..\External_libs\imgui-docking\imgui-docking;$(ProjectDir)..\External_libs\imgui-docking\imgui-docking\backends;$(ProjectDir)..\External_libs\FastNoiseLite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)..\External_libs\GLEW\glew-2.1.0\lib\Release\x64;$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3_mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(ProjectDir)glew32.dll" "$(OutDir)"&#x0D;&#x0A;copy /Y "$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022\glfw3.dll" "$(OutDir)"</Command>
+      <Command>if exist "$(OutDir)glew32.dll" del /Q "$(OutDir)glew32.dll"&#x0D;&#x0A;if exist "$(OutDir)glfw3.dll" del /Q "$(OutDir)glfw3.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;IMGUI_IMPL_OPENGL_LOADER_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;GLEW_STATIC;IMGUI_IMPL_OPENGL_LOADER_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(ProjectDir)..\External_libs\GLEW\glew-2.1.0\include;$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\include;$(ProjectDir)..\External_libs\glm_0_9_9_7\glm\;$(ProjectDir)..\External_libs\glad\include;$(ProjectDir)..\External_libs\stb;$(ProjectDir)..\External_libs\miniaudio;$(ProjectDir)..\External_libs\tinyply-master\tinyply-master\source;$(ProjectDir)..\External_libs\plog\include;$(ProjectDir)..\External_libs\imgui-docking\imgui-docking;$(ProjectDir)..\External_libs\imgui-docking\imgui-docking\backends;$(ProjectDir)..\External_libs\FastNoiseLite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)..\External_libs\GLEW\glew-2.1.0\lib\Release\x64;$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3_mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(ProjectDir)glew32.dll" "$(OutDir)"&#x0D;&#x0A;copy /Y "$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022\glfw3.dll" "$(OutDir)"</Command>
+      <Command>if exist "$(OutDir)glew32.dll" del /Q "$(OutDir)glew32.dll"&#x0D;&#x0A;if exist "$(OutDir)glfw3.dll" del /Q "$(OutDir)glfw3.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -144,19 +147,20 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;IMGUI_IMPL_OPENGL_LOADER_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;GLEW_STATIC;IMGUI_IMPL_OPENGL_LOADER_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>$(ProjectDir)..\External_libs\GLEW\glew-2.1.0\include;$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\include;$(ProjectDir)..\External_libs\glm_0_9_9_7\glm\;$(ProjectDir)..\External_libs\glad\include;$(ProjectDir)..\External_libs\stb;$(ProjectDir)..\External_libs\miniaudio;$(ProjectDir)..\External_libs\tinyply-master\tinyply-master\source;$(ProjectDir)..\External_libs\plog\include;$(ProjectDir)..\External_libs\imgui-docking\imgui-docking;$(ProjectDir)..\External_libs\imgui-docking\imgui-docking\backends;$(ProjectDir)..\External_libs\FastNoiseLite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ProjectDir)..\External_libs\GLEW\glew-2.1.0\lib\Release\x64;$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glew32s.lib;glfw3_mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(ProjectDir)glew32.dll" "$(OutDir)"&#x0D;&#x0A;copy /Y "$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022\glfw3.dll" "$(OutDir)"</Command>
+      <Command>if exist "$(OutDir)glew32.dll" del /Q "$(OutDir)glew32.dll"&#x0D;&#x0A;if exist "$(OutDir)glfw3.dll" del /Q "$(OutDir)glfw3.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
