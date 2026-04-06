@@ -428,9 +428,9 @@ SanitizedShader ShaderSanitizer::Sanitize(const std::string& rawText)
     {
         finalSource << "\nvoid main()\n"
                     << "{\n"
-                    << "    vec4 __codexColor = vec4(0.0);\n"
-                    << "    mainImage(__codexColor, gl_FragCoord.xy);\n"
-                    << "    FragColor = __codexColor;\n"
+                    << "    vec4 codexMainImageColor = vec4(0.0);\n"
+                    << "    mainImage(codexMainImageColor, gl_FragCoord.xy);\n"
+                    << "    FragColor = codexMainImageColor;\n"
                     << "}\n";
         result.entryPoint = ShaderEntryPoint::MainImage;
     }
