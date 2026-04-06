@@ -1,5 +1,15 @@
 .vs/
 
+build/
+logs/
+shaders_input/
+shaders_valid/
+shaders_selected_for_rendering/
+shaders_rendered/
+video_rendered/
+temp/
+thumbnails/
+
 # Ignore all x64 folders except inside External_libs
 **/x64/
 

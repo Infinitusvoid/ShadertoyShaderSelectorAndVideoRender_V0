@@ -24,6 +24,7 @@
     <ProjectGuid>{383e17c0-f0a1-4adc-97a3-4af76cab7824}</ProjectGuid>
     <RootNamespace>GLTemplateV0</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>ShadertoyShaderSelectorAndVideoRender_V0</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -31,6 +32,8 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <IntDir>$(ProjectDir)build\$(Platform)\$(Configuration)\intermediate\</IntDir>
+    <OutDir>$(ProjectDir)..\build\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -38,12 +41,16 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <IntDir>$(ProjectDir)build\$(Platform)\$(Configuration)\intermediate\</IntDir>
+    <OutDir>$(ProjectDir)..\build\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <IntDir>$(ProjectDir)build\$(Platform)\$(Configuration)\intermediate\</IntDir>
+    <OutDir>$(ProjectDir)..\build\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -51,6 +58,8 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <IntDir>$(ProjectDir)build\$(Platform)\$(Configuration)\intermediate\</IntDir>
+    <OutDir>$(ProjectDir)..\build\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -74,17 +83,20 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;IMGUI_IMPL_OPENGL_LOADER_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)External_libs\GLEW\glew-2.1.0\include;$(SolutionDir)External_libs\GLFW\glfw-3.3.8.bin.WIN64\include;$(SolutionDir)External_libs\glm_0_9_9_7\glm\;$(SolutionDir)External_libs\ASSIMP\include;$(SolutionDir)External_libs\glad\include;$(SolutionDir)External_libs\stb;$(SolutionDir)External_libs\miniaudio;$(SolutionDir)External_libs\tinyply-master\tinyply-master\source;$(SolutionDir)External_libs\plog\include;$(SolutionDir)External_libs\imgui-docking;$(SolutionDir)External_libs\FastNoiseLite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\External_libs\GLEW\glew-2.1.0\include;$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\include;$(ProjectDir)..\External_libs\glm_0_9_9_7\glm\;$(ProjectDir)..\External_libs\glad\include;$(ProjectDir)..\External_libs\stb;$(ProjectDir)..\External_libs\miniaudio;$(ProjectDir)..\External_libs\tinyply-master\tinyply-master\source;$(ProjectDir)..\External_libs\plog\include;$(ProjectDir)..\External_libs\imgui-docking\imgui-docking;$(ProjectDir)..\External_libs\imgui-docking\imgui-docking\backends;$(ProjectDir)..\External_libs\FastNoiseLite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)External_libs\GLEW\glew-2.1.0\lib\Release\x64;$(SolutionDir)External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022;$(SolutionDir)External_libs\ASSIMP\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\External_libs\GLEW\glew-2.1.0\lib\Release\x64;$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(ProjectDir)glew32.dll" "$(OutDir)"&#x0D;&#x0A;copy /Y "$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022\glfw3.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -92,33 +104,39 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;IMGUI_IMPL_OPENGL_LOADER_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)External_libs\GLEW\glew-2.1.0\include;$(SolutionDir)External_libs\GLFW\glfw-3.3.8.bin.WIN64\include;$(SolutionDir)External_libs\glm_0_9_9_7\glm\;$(SolutionDir)External_libs\ASSIMP\include;$(SolutionDir)External_libs\glad\include;$(SolutionDir)External_libs\stb;$(SolutionDir)External_libs\miniaudio;$(SolutionDir)External_libs\tinyply-master\tinyply-master\source;$(SolutionDir)External_libs\plog\include;$(SolutionDir)External_libs\imgui-docking;$(SolutionDir)External_libs\FastNoiseLite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\External_libs\GLEW\glew-2.1.0\include;$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\include;$(ProjectDir)..\External_libs\glm_0_9_9_7\glm\;$(ProjectDir)..\External_libs\glad\include;$(ProjectDir)..\External_libs\stb;$(ProjectDir)..\External_libs\miniaudio;$(ProjectDir)..\External_libs\tinyply-master\tinyply-master\source;$(ProjectDir)..\External_libs\plog\include;$(ProjectDir)..\External_libs\imgui-docking\imgui-docking;$(ProjectDir)..\External_libs\imgui-docking\imgui-docking\backends;$(ProjectDir)..\External_libs\FastNoiseLite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)External_libs\GLEW\glew-2.1.0\lib\Release\x64;$(SolutionDir)External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022;$(SolutionDir)External_libs\ASSIMP\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\External_libs\GLEW\glew-2.1.0\lib\Release\x64;$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(ProjectDir)glew32.dll" "$(OutDir)"&#x0D;&#x0A;copy /Y "$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022\glfw3.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;IMGUI_IMPL_OPENGL_LOADER_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)External_libs\GLEW\glew-2.1.0\include;$(SolutionDir)External_libs\GLFW\glfw-3.3.8.bin.WIN64\include;$(SolutionDir)External_libs\glm_0_9_9_7\glm\;$(SolutionDir)External_libs\ASSIMP\include;$(SolutionDir)External_libs\glad\include;$(SolutionDir)External_libs\stb;$(SolutionDir)External_libs\miniaudio;$(SolutionDir)External_libs\tinyply-master\tinyply-master\source;$(SolutionDir)External_libs\plog\include;$(SolutionDir)External_libs\imgui-docking;$(SolutionDir)External_libs\FastNoiseLite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\External_libs\GLEW\glew-2.1.0\include;$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\include;$(ProjectDir)..\External_libs\glm_0_9_9_7\glm\;$(ProjectDir)..\External_libs\glad\include;$(ProjectDir)..\External_libs\stb;$(ProjectDir)..\External_libs\miniaudio;$(ProjectDir)..\External_libs\tinyply-master\tinyply-master\source;$(ProjectDir)..\External_libs\plog\include;$(ProjectDir)..\External_libs\imgui-docking\imgui-docking;$(ProjectDir)..\External_libs\imgui-docking\imgui-docking\backends;$(ProjectDir)..\External_libs\FastNoiseLite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)External_libs\GLEW\glew-2.1.0\lib\Release\x64;$(SolutionDir)External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022;$(SolutionDir)External_libs\ASSIMP\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\External_libs\GLEW\glew-2.1.0\lib\Release\x64;$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(ProjectDir)glew32.dll" "$(OutDir)"&#x0D;&#x0A;copy /Y "$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022\glfw3.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -126,20 +144,38 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;IMGUI_IMPL_OPENGL_LOADER_GLEW;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)External_libs\GLEW\glew-2.1.0\include;$(SolutionDir)External_libs\GLFW\glfw-3.3.8.bin.WIN64\include;$(SolutionDir)External_libs\glm_0_9_9_7\glm\;$(SolutionDir)External_libs\ASSIMP\include;$(SolutionDir)External_libs\glad\include;$(SolutionDir)External_libs\stb;$(SolutionDir)External_libs\miniaudio;$(SolutionDir)External_libs\tinyply-master\tinyply-master\source;$(SolutionDir)External_libs\plog\include;$(SolutionDir)External_libs\imgui-docking;$(SolutionDir)External_libs\FastNoiseLite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\External_libs\GLEW\glew-2.1.0\include;$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\include;$(ProjectDir)..\External_libs\glm_0_9_9_7\glm\;$(ProjectDir)..\External_libs\glad\include;$(ProjectDir)..\External_libs\stb;$(ProjectDir)..\External_libs\miniaudio;$(ProjectDir)..\External_libs\tinyply-master\tinyply-master\source;$(ProjectDir)..\External_libs\plog\include;$(ProjectDir)..\External_libs\imgui-docking\imgui-docking;$(ProjectDir)..\External_libs\imgui-docking\imgui-docking\backends;$(ProjectDir)..\External_libs\FastNoiseLite;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)External_libs\GLEW\glew-2.1.0\lib\Release\x64;$(SolutionDir)External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022;$(SolutionDir)External_libs\ASSIMP\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3.lib;assimp-vc140-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\External_libs\GLEW\glew-2.1.0\lib\Release\x64;$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy /Y "$(ProjectDir)glew32.dll" "$(OutDir)"&#x0D;&#x0A;copy /Y "$(ProjectDir)..\External_libs\GLFW\glfw-3.3.8.bin.WIN64\lib-vc2022\glfw3.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\AppFolders.cpp" />
+    <ClCompile Include="src\BatchRenderer.cpp" />
+    <ClCompile Include="src\GlRuntime.cpp" />
+    <ClCompile Include="src\Logger.cpp" />
+    <ClCompile Include="src\ShaderCatalog.cpp" />
+    <ClCompile Include="src\ShaderSanitizer.cpp" />
+    <ClCompile Include="src\ShaderToolApp.cpp" />
+    <ClCompile Include="src\StbImpl.cpp" />
+    <ClCompile Include="src\ThumbnailCache.cpp" />
+    <ClCompile Include="..\External_libs\imgui-docking\imgui-docking\imgui.cpp" />
+    <ClCompile Include="..\External_libs\imgui-docking\imgui-docking\imgui_draw.cpp" />
+    <ClCompile Include="..\External_libs\imgui-docking\imgui-docking\imgui_tables.cpp" />
+    <ClCompile Include="..\External_libs\imgui-docking\imgui-docking\imgui_widgets.cpp" />
+    <ClCompile Include="..\External_libs\imgui-docking\imgui-docking\backends\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\External_libs\imgui-docking\imgui-docking\backends\imgui_impl_opengl3.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
